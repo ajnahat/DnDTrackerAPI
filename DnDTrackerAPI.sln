@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30611.23
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DnDTrackerAPI", "DnDTrackerAPI.csproj", "{582561C8-48CE-4317-9504-567953FEAD7E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{582561C8-48CE-4317-9504-567953FEAD7E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{582561C8-48CE-4317-9504-567953FEAD7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{582561C8-48CE-4317-9504-567953FEAD7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{582561C8-48CE-4317-9504-567953FEAD7E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {234AAE48-2C98-458F-A272-87E8C094C81F}
+	EndGlobalSection
+EndGlobal

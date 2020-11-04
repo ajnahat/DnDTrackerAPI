@@ -22,8 +22,7 @@ namespace DnDTrackerAPI
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<DnDTrackerContext>(o =>
-                o.UseSqlServer("Data Source=localhost;initial catalog=DnDTracker;User ID=SA;Password=Password1!;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False")
-                );
+                o.UseSqlServer("Data Source=localhost;initial catalog=DnDTracker;User ID=SA;Password=Password1!;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False"));
             services.AddControllers().AddNewtonsoftJson(options => options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore);
         }
 

@@ -3,14 +3,16 @@ using DnDTrackerAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DnDTrackerAPI.Migrations
 {
     [DbContext(typeof(DnDTrackerContext))]
-    partial class DnDTrackerContextModelSnapshot : ModelSnapshot
+    [Migration("20201101222033_new2")]
+    partial class new2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -50,9 +52,6 @@ namespace DnDTrackerAPI.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("Count")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Sort")
                         .HasColumnType("int");
 
                     b.HasKey("Index", "WaveId");

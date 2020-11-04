@@ -9,7 +9,6 @@ namespace DnDTrackerAPI.Models
         public int WaveId { get; set; }
         public int Sort { get; set; }
         public virtual List<Monster> Monsters { get; set; }
-
         [JsonIgnore]
         public virtual Encounter Encounter { get; set; }
     }

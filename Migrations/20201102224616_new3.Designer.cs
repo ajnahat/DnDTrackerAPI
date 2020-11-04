@@ -3,14 +3,16 @@ using DnDTrackerAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DnDTrackerAPI.Migrations
 {
     [DbContext(typeof(DnDTrackerContext))]
-    partial class DnDTrackerContextModelSnapshot : ModelSnapshot
+    [Migration("20201102224616_new3")]
+    partial class new3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

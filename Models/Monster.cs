@@ -7,8 +7,11 @@ namespace DnDTrackerAPI.Models
         public int WaveId { get; set; }
         public string Index { get; set; }
         public int Count { get; set; }
+        public int Sort { get; set; }
         [JsonIgnore]
         public virtual Wave Wave { get; set; }
+
+        public Monster() { }
 
         public Monster(string index)
         {

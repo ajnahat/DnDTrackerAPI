@@ -1,6 +1,7 @@
 ﻿using DnDTrackerAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -41,25 +42,6 @@ namespace DnDTrackerAPI.Controllers
             return Ok(user);
         }
 
-        [HttpPost("authenticate")]
-        public async Task<ActionResult<User>> AuthenticateLogin([FromBody] AuthenticateLoginPayload request)
-        {
-            var user = await _context.Users.SingleOrDefaultAsync(o => o.UserName.ToUpper() == request.UserName.ToUpper());
-
-            if (user == null)
-            {
-                return BadRequest("There is no user by that name.");
-            }
-
-            return Ok(user);
-        }
-
-        [HttpGet("authenticate/{userName}")]
-        public ActionResult<bool> UserNameExists(string userName)
-        {
-            return Ok(UserExists(userName));
-        }
-
         [HttpPut("{id}")]
         public async Task<IActionResult> PutUser(int id, User user)
         {
@@ -89,10 +71,15 @@ namespace DnDTrackerAPI.Controllers
             return NoContent();
         }
 
-        [HttpPost("{userName}")]
-        public async Task<ActionResult<User>> PostUser(string userName)
+        [HttpPost()]
+        public async Task<ActionResult<User>> PostUser([FromBody] PostUser args)
         {
-            var user = new User() { UserName = userName };
+            if (await _context.Users.AnyAsync(o => o.UserName.ToUpper() == args.UserName.ToUpper()))
+            {
+                return BadRequest("A user already exists by that name.");
+            }
+
+            var user = new User() { UserName = args.UserName };
 
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
@@ -120,18 +107,29 @@ namespace DnDTrackerAPI.Controllers
             return _context.Users.Any(e => e.UserId == id);
         }
 
-        private bool UserExists(string userName)
-        {
-            return _context.Users.Any(e => e.UserName.ToUpper() == userName.ToUpper());
-        }
-
         [HttpGet("{id}/encounters")]
         public async Task<ActionResult<IEnumerable<Encounter>>> GetEncounters(int id)
         {
-            return await _context.Encounters.Where(o => o.UserId == id)
-                .Include(o => o.Waves)
-                    .ThenInclude(o => o.Monsters)
-                .ToListAsync();
+            try
+            {
+                var encounters = _context.Encounters.Where(o => o.UserId == id)
+                    .OrderBy(o => o.Sort)
+                    .Include(o => o.Waves)
+                        .ThenInclude(o => o.Monsters);
+
+                await encounters.ForEachAsync(o =>
+                {
+                    o.Waves = o.Waves.OrderBy(p => p.Sort).ToList();
+                    o.Waves.ForEach(p => p.Monsters = p.Monsters.OrderBy(q => q.Sort).ToList());
+                });
+
+
+                return await encounters.ToListAsync(); ;
+            }
+            catch (Exception e)
+            {
+                throw;
+            }
         }
     }
 }

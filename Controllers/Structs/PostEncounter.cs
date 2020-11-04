@@ -1,4 +1,4 @@
-﻿using DnDTrackerAPI.Objects;
+﻿using DnDTrackerAPI.Models;
 using System.Collections.Generic;
 
 namespace DnDTrackerAPI.Controllers
@@ -7,6 +7,6 @@ namespace DnDTrackerAPI.Controllers
     {
         public int UserId { get; set; }
         public string EncounterName { get; set; }
-        public List<List<Countable<string>>> Waves { get; set; }
+        public List<Wave> Waves { get; set; }
     }
 }

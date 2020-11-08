@@ -1,6 +1,7 @@
 using DnDTrackerAPI.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,6 +22,8 @@ namespace DnDTrackerAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddControllersWithViews();
+            services.AddSpaStaticFiles(config => config.RootPath = "DNDTracker/dist");
             services.AddDbContext<DnDTrackerContext>(o =>
                 o.UseSqlServer("Data Source=localhost;initial catalog=DnDTracker;User ID=SA;Password=Password1!;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False"));
             services.AddControllers().AddNewtonsoftJson(options => options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore);
@@ -35,12 +38,12 @@ namespace DnDTrackerAPI
             }
 
             app.UseHttpsRedirection();
+            app.UseStaticFiles();
 
-            app.UseCors(builder => builder
-               //.WithOrigins("http://localhost:4200")
-               .AllowAnyOrigin()
-               .AllowAnyMethod()
-               .AllowAnyHeader());
+            if (!env.IsDevelopment())
+            {
+                app.UseSpaStaticFiles();
+            }
 
             app.UseRouting();
 
@@ -52,7 +55,13 @@ namespace DnDTrackerAPI
             });
 
             app.UseSpa(o =>
-                o.Options.);
+            {
+                o.Options.SourcePath = "DNDTracker";
+                if (env.IsDevelopment())
+                {
+                    o.UseProxyToSpaDevelopmentServer("http://localhost:4200");
+                }
+            });
         }
     }
 }

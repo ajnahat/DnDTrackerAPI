@@ -9,7 +9,6 @@ namespace DnDTrackerAPI.Models
         public int UserId { get; set; }
         public string EncounterName { get; set; }
         public int Sort { get; set; }
-        [JsonIgnore]
         public virtual User User { get; set; }
         public virtual List<Wave> Waves { get; set; }
     }

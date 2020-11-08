@@ -37,6 +37,7 @@ namespace DnDTrackerAPI
             app.UseHttpsRedirection();
 
             app.UseCors(builder => builder
+               //.WithOrigins("http://localhost:4200")
                .AllowAnyOrigin()
                .AllowAnyMethod()
                .AllowAnyHeader());
@@ -49,6 +50,9 @@ namespace DnDTrackerAPI
             {
                 endpoints.MapControllers();
             });
+
+            app.UseSpa(o =>
+                o.Options.);
         }
     }
 }

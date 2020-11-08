@@ -7,7 +7,6 @@ namespace DnDTrackerAPI.Models
     {
         public int UserId { get; set; }
         public string UserName { get; set; }
-        [JsonIgnore]
         public virtual List<Encounter> Encounters { get; set; }
     }
 }

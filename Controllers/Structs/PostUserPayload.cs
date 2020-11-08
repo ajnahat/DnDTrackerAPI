@@ -1,6 +1,6 @@
 ﻿namespace DnDTrackerAPI.Controllers
 {
-    public struct PostUser
+    public struct PostUserPayload
     {
         public string UserName { get; set; }
     }

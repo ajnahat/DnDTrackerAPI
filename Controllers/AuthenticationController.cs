@@ -23,7 +23,7 @@ namespace DnDTrackerAPI.Controllers
 
             if (user == null)
             {
-                return BadRequest("There is no user by that name.");
+                return Unauthorized("There is no user by that name.");
             }
 
             return Ok(user);

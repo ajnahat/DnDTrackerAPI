@@ -1,4 +1,5 @@
 ﻿using DnDTrackerAPI.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -23,47 +24,38 @@ namespace DnDTrackerAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Encounter>>> GetEncounters()
         {
-            return await _context.Encounters
+            return Ok(await _context.Encounters
                 .Include(o => o.Waves)
                     .ThenInclude(o => o.Monsters)
-                .ToListAsync();
+                .ToListAsync());
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Encounter>> GetEncounter(int id)
         {
-            var encounter = await _context.Encounters.FindAsync(id);
+            var encounter = await _context
+                .Encounters
+                .Include(o => o.Waves)
+                    .ThenInclude(o => o.Monsters)
+                .SingleOrDefaultAsync(o => o.EncounterId == id);
 
             if (encounter == null)
-            {
-                return NotFound();
-            }
-
-            await _context.Entry(encounter)
-                .Collection(o => o.Waves)
-                .LoadAsync();
-
-            await _context.Entry(encounter)
-                .Collection(o => o.Waves)
-                .Query()
-                .Include(o => o.Monsters)
-                .LoadAsync();
-
-            return encounter;
-        }
-
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutEncounter(int id, Encounter encounter)
-        {
-            if (id != encounter.EncounterId)
             {
                 return BadRequest();
             }
 
+            return Ok(encounter);
+        }
+
+        [HttpPut()]
+        public async Task<IActionResult> PutEncounter(Encounter encounter)
+        {
+            await _context.Database.BeginTransactionAsync();
+
             var server = await _context.Encounters
                 .Include(o => o.Waves)
                     .ThenInclude(o => o.Monsters)
-                .SingleOrDefaultAsync(o => o.EncounterId == id);
+                .SingleOrDefaultAsync(o => o.EncounterId == encounter.EncounterId);
 
             if (server == null)
             {
@@ -130,34 +122,19 @@ namespace DnDTrackerAPI.Controllers
                 }
             }
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DBConcurrencyException)
-            {
-                if (!EncounterExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            await _context.SaveChangesAsync();
+            _context.Database.CommitTransaction();
 
-            return NoContent();
+            return Ok("Successfully updated encounter.");
         }
 
         [HttpPost]
-        public async Task<ActionResult<Encounter>> PostEncounter([FromBody] PostEncounter args)
+        public async Task<ActionResult<Encounter>> PostEncounter([FromBody] PostEncounterPayload args)
         {
             if (args.Waves?.Count == 0)
             {
                 return null;
             }
-
-            int i = 1;
 
             Encounter encounter = new Encounter
             {
@@ -181,7 +158,7 @@ namespace DnDTrackerAPI.Controllers
                 var encounter = await _context.Encounters.FindAsync(id);
                 if (encounter == null)
                 {
-                    return NotFound();
+                    return BadRequest();
                 }
 
                 _context.Encounters.Remove(encounter);
@@ -190,13 +167,15 @@ namespace DnDTrackerAPI.Controllers
             }
             catch (Exception)
             {
-                return Ok(await _context.Encounters.SingleOrDefaultAsync(o => o.EncounterId == id) == null);
+                if (await _context.Encounters.SingleOrDefaultAsync(o => o.EncounterId == id) == null)
+                {
+                    return Ok(true);
+                }
+                else
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError);
+                }
             }
-        }
-
-        private bool EncounterExists(int id)
-        {
-            return _context.Encounters.Any(e => e.EncounterId == id);
         }
     }
 }

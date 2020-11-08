@@ -22,11 +22,12 @@ namespace DnDTrackerAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> GetUsers()
         {
-            return await _context.Users
+            return Ok(
+                await _context.Users
                 .Include(o => o.Encounters)
                     .ThenInclude(o => o.Waves)
                         .ThenInclude(o => o.Monsters)
-                .ToListAsync();
+                .ToListAsync());
         }
 
         [HttpGet("{id}")]
@@ -42,37 +43,18 @@ namespace DnDTrackerAPI.Controllers
             return Ok(user);
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutUser(int id, User user)
+        [HttpPut()]
+        public async Task<IActionResult> PutUser(User user)
         {
-            if (id != user.UserId)
-            {
-                return BadRequest();
-            }
+            _context.Update(user);
 
-            _context.Entry(user).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!UserExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            return Ok();
         }
 
         [HttpPost()]
-        public async Task<ActionResult<User>> PostUser([FromBody] PostUser args)
+        public async Task<ActionResult<User>> PostUser([FromBody] PostUserPayload args)
         {
             if (await _context.Users.AnyAsync(o => o.UserName.ToUpper() == args.UserName.ToUpper()))
             {
@@ -84,7 +66,7 @@ namespace DnDTrackerAPI.Controllers
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("PostUser", new { id = user.UserId }, user);
+            return CreatedAtAction(nameof(PostUser), new { id = user.UserId }, user);
         }
 
         [HttpDelete("{id}")]
@@ -93,43 +75,31 @@ namespace DnDTrackerAPI.Controllers
             var user = await _context.Users.FindAsync(id);
             if (user == null)
             {
-                return NotFound();
+                return BadRequest();
             }
 
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();
 
-            return user;
-        }
-
-        private bool UserExists(int id)
-        {
-            return _context.Users.Any(e => e.UserId == id);
+            return Ok(user);
         }
 
         [HttpGet("{id}/encounters")]
         public async Task<ActionResult<IEnumerable<Encounter>>> GetEncounters(int id)
         {
-            try
+            var encounters = _context.Encounters
+                .Where(o => o.UserId == id)
+                .OrderBy(o => o.Sort)
+                .Include(o => o.Waves)
+                    .ThenInclude(o => o.Monsters);
+
+            await encounters.ForEachAsync(o =>
             {
-                var encounters = _context.Encounters.Where(o => o.UserId == id)
-                    .OrderBy(o => o.Sort)
-                    .Include(o => o.Waves)
-                        .ThenInclude(o => o.Monsters);
+                o.Waves = o.Waves.OrderBy(p => p.Sort).ToList();
+                o.Waves.ForEach(p => p.Monsters = p.Monsters.OrderBy(q => q.Sort).ToList());
+            });
 
-                await encounters.ForEachAsync(o =>
-                {
-                    o.Waves = o.Waves.OrderBy(p => p.Sort).ToList();
-                    o.Waves.ForEach(p => p.Monsters = p.Monsters.OrderBy(q => q.Sort).ToList());
-                });
-
-
-                return await encounters.ToListAsync(); ;
-            }
-            catch (Exception e)
-            {
-                throw;
-            }
+            return Ok(await encounters.ToListAsync());
         }
     }
 }

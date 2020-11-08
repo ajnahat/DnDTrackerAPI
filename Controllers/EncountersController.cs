@@ -151,31 +151,18 @@ namespace DnDTrackerAPI.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult<bool>> DeleteEncounter(int id)
+        public async Task<IActionResult> DeleteEncounter(int id)
         {
-            try
+            var encounter = await _context.Encounters.FindAsync(id);
+            if (encounter == null)
             {
-                var encounter = await _context.Encounters.FindAsync(id);
-                if (encounter == null)
-                {
-                    return BadRequest();
-                }
+                return BadRequest();
+            }
 
-                _context.Encounters.Remove(encounter);
-                await _context.SaveChangesAsync();
-                return Ok(true);
-            }
-            catch (Exception)
-            {
-                if (await _context.Encounters.SingleOrDefaultAsync(o => o.EncounterId == id) == null)
-                {
-                    return Ok(true);
-                }
-                else
-                {
-                    return StatusCode(StatusCodes.Status500InternalServerError);
-                }
-            }
+            _context.Encounters.Remove(encounter);
+            await _context.SaveChangesAsync();
+
+            return Ok();
         }
     }
 }
